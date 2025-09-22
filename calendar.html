@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Philippine Calendar 2024 - Chrome Hearts Style</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap');
+
+    body {
+      font-family: 'Georgia', serif;
+      max-width: 900px;
+      margin: auto;
+      background-color: #111;
+      color: #eee;
+    }
+
+    h1,
+    h2 {
+      font-family: 'UnifrakturCook', cursive;
+      text-align: center;
+      letter-spacing: 3px;
+      margin-top: 1rem;
+      color: #eee;
+      text-shadow: 1px 1px 3px #660000;
+    }
+
+    .calendar {
+      margin-bottom: 40px;
+      border: 2px solid #555;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 0 10px #990000aa;
+      background-color: #1a1a1a;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid #444;
+      text-align: center;
+      padding: 8px;
+      width: 13%;
+      font-family: 'Georgia', serif;
+      font-size: 14px;
+    }
+
+    th.weeknum,
+    td.weeknum {
+      width: 6%;
+      background: #222;
+      color: transparent;
+      border: 1px solid #333;
+    }
+
+    th {
+      background-color: #000;
+      color: #eee;
+      font-weight: bold;
+      font-family: 'UnifrakturCook', cursive;
+      font-size: 16px;
+      text-shadow: 0 0 7px #bb2222;
+    }
+
+    .holiday {
+      background-color: #5a0000;
+      cursor: pointer;
+      font-weight: bold;
+      color: #ff5555;
+      border: 2px solid #ff2222;
+      font-family: 'UnifrakturCook', cursive;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    .holiday:hover {
+      background-color: #7f0000;
+      color: #ffaaaa;
+      border-color: #ff4444;
+    }
+
+    /* Popup style */
+    .popup {
+      display: none;
+      position: fixed;
+      background: #111;
+      border: 3px solid #bb2222;
+      padding: 20px;
+      z-index: 10;
+      max-width: 320px;
+      box-shadow: 0 0 20px #cc2222aa;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #eee;
+      font-family: 'Georgia', serif;
+    }
+
+    .popup img {
+      max-width: 100%;
+      height: auto;
+      margin-top: 10px;
+      border: 1px solid #bb2222;
+      border-radius: 4px;
+      box-shadow: 0 0 8px #bb2222;
+    }
+
+    .popup-close {
+      background: #bb2222;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      float: right;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      box-shadow: 0 0 6px #bb2222;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Philippine Calendar 2024</h1>
+  <div id="calendar-container"></div>
+
+  <div id="holiday-popup" class="popup" aria-hidden="true">
+    <button class="popup-close" onclick="closePopup()" aria-label="Close Popup">X</button>
+    <h3 id="holiday-title"></h3>
+    <p id="holiday-desc"></p>
+    <img id="holiday-img" src="" alt="Holiday image" />
+  </div>
+
+  <script>
+    const holidays = {
+      "1-1": {
+        name: "New Year's Day",
+        desc: "The first day of the year, celebrated worldwide.",
+        img: "happy new year.jpg"
+      },
+      "2-10": {
+        name: "Chinese New Year",
+        desc: "The celebration of the lunar new year.",
+        img: "chinese.jpg"
+      },
+      "3-28": {
+        name: "Maundy Thursday",
+        desc: "Christian observance before Easter.",
+        img: "maundy.jpg"
+      },
+      "3-29": {
+        name: "Good Friday",
+        desc: "Commemoration of the crucifixion of Jesus Christ.",
+        img: "friday.jpg"
+      },
+      "3-30": {
+        name: "Black Saturday",
+        desc: "The day between Good Friday and Easter Sunday.",
+        img: "saturday.jpg"
+      },
+      "4-9": {
+        name: "Araw ng Kagitingan (Day of Valor)",
+        desc: "Commemorates Filipino and American soldiers' heroism.",
+        img: "kagitingan.webp"
+      },
+      "5-1": {
+        name: "Labor Day",
+        desc: "Celebrates the economic and social achievements of workers.",
+        img: "labor.jpg"
+      },
+      "6-12": {
+        name: "Independence Day",
+        desc: "Philippine independence from Spain, declared in 1898.",
+        img: "kalayaan.webp"
+      },
+      "8-21": {
+        name: "Ninoy Aquino Day",
+        desc: "Commemorates the assassination of Benigno Aquino Jr.",
+        img: "ninoy.webp"
+      },
+      "8-26": {
+        name: "National Heroes Day",
+        desc: "Honors the bravery of Filipino heroes.",
+        img: "hero.webp"
+      },
+      "11-1": {
+        name: "All Saints' Day",
+        desc: "Commemorates all saints.",
+        img: "saint.jpg"
+      },
+      "11-2": {
+        name: "All Souls' Day",
+        desc: "Remembrance of all faithful departed souls.",
+        img: "soul.jpg"
+      },
+      "11-30": {
+        name: "Bonifacio Day",
+        desc: "Commemoration of Andres Bonifacio, Filipino revolutionary leader.",
+        img: "bonifacio.jpg"
+      },
+      "12-8": {
+        name: "Feast of the Immaculate Conception",
+        desc: "Celebration of the Virgin Mary's Immaculate Conception.",
+        img: "holy.webp"
+      },
+      "12-24": {
+        name: "Christmas Eve",
+        desc: "The evening before Christmas Day.",
+        img: "eve.jpg"
+      },
+      "12-25": {
+        name: "Christmas Day",
+        desc: "Celebration of the birth of Jesus Christ.",
+        img: "christmas.jpg"
+      },
+      "12-30": {
+        name: "Rizal Day",
+        desc: "Commemoration of José Rizal, Philippine national hero.",
+        img: "rizal.jpg"
+      },
+      "12-31": {
+        name: "New Year's Eve",
+        desc: "The last day of the year.",
+        img: "evee.jpg"
+      }
+    };
+
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    function getWeekNumber(d) {
+      d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+      return weekNo;
+    }
+
+    function createCalendar(year) {
+      const container = document.getElementById("calendar-container");
+      container.innerHTML = "";
+
+      for (let m = 0; m < 12; m++) {
+        const monthDiv = document.createElement("div");
+        monthDiv.className = "calendar";
+        const title = document.createElement("h2");
+        title.textContent = monthNames[m] + " " + year;
+        monthDiv.appendChild(title);
+
+        const table = document.createElement("table");
+
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+        const thWeek = document.createElement("th");
+        thWeek.textContent = "Wk";
+        thWeek.className = "weeknum";
+        headerRow.appendChild(thWeek);
+        dayNames.forEach(dn => {
+          const th = document.createElement("th");
+          th.textContent = dn;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+
+        let firstDate = new Date(year, m, 1);
+        let lastDate = new Date(year, m + 1, 0);
+        let firstDayIndex = firstDate.getDay();
+
+        let date = 1;
+        let currentWeek = getWeekNumber(new Date(year, m, 1 - firstDayIndex));
+        while (date <= lastDate.getDate()) {
+          const tr = document.createElement("tr");
+          const weekTd = document.createElement("td");
+          weekTd.className = "weeknum";
+          // Leave content blank for week numbers as per request
+          weekTd.textContent = "";
+          tr.appendChild(weekTd);
+
+          for (let i = 0; i < 7; i++) {
+            const td = document.createElement("td");
+            let dayNum = date - firstDayIndex;
+            if (dayNum > 0 && dayNum <= lastDate.getDate()) {
+              td.textContent = dayNum;
+
+              const key = (m + 1) + "-" + dayNum;
+              if (holidays[key]) {
+                td.className = "holiday";
+                td.onclick = () => openHolidayPopup(key);
+              }
+            }
+            tr.appendChild(td);
+            date++;
+            if (date > lastDate.getDate() + firstDayIndex) break;
+          }
+
+          tbody.appendChild(tr);
+          currentWeek++;
+        }
+
+        table.appendChild(tbody);
+        monthDiv.appendChild(table);
+        container.appendChild(monthDiv);
+      }
+    }
+
+    function openHolidayPopup(key) {
+      const popup = document.getElementById("holiday-popup");
+      document.getElementById("holiday-title").textContent = holidays[key].name;
+      document.getElementById("holiday-desc").textContent = holidays[key].desc;
+      document.getElementById("holiday-img").src = holidays[key].img;
+      popup.style.display = "block";
+      popup.setAttribute('aria-hidden', 'false');
+    }
+
+    function closePopup() {
+      const popup = document.getElementById("holiday-popup");
+      popup.style.display = "none";
+      popup.setAttribute('aria-hidden', 'true');
+    }
+
+    createCalendar(2024);
+  </script>
+</body>
+
+</html>
